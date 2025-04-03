@@ -27,7 +27,7 @@
 describe("Test rejestracji, logowania i edycji konta", () => {
   const randomId = Math.floor(100 + Math.random() * 900);
   const newUser = {
-    email: `user_${randomId}@test.com`,
+    email: "user_${randomId}@test.com",
     password: "TestoweHaslo123",
   };
 

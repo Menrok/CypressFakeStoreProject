@@ -1,5 +1,8 @@
 /// <reference types="cypress"/>
 
+import { CardData, User } from "../../support/interfaces";
+import { selectors } from "../../support/selectors";
+
 /*
     Test #0001: Proces zakupowy - dodanie produktów, kupon, płatność
     1. Przejdź do strony głównej sklepu.
@@ -17,13 +20,12 @@
 */
 
 describe("Proces zakupowy - dodanie produktów, kupon, płatność", () => {
-  const User = {
+  const user : User = {
     email: "menrok@test.com",
     password: "TestoweHaslo123",
   };
 
-  const Card = {
-    brand: "Visa",
+  const Card : CardData = {
     number: "4242424242424242",
     cvc: "123",
     date: "03/30",
@@ -34,45 +36,43 @@ describe("Proces zakupowy - dodanie produktów, kupon, płatność", () => {
 
     cy.contains("Sklep").click();
     cy.contains("Yoga i pilates").click();
-    cy.get(".add_to_cart_button").first().click();
+    cy.get(selectors.shopping.addToCartButton).first().click();
 
     cy.contains("Sklep").click();
     cy.contains("Windsurfing ").click();
-    cy.get(".add_to_cart_button").first().click();
+    cy.get(selectors.shopping.addToCartButton).first().click();
 
-    cy.contains("Koszyk").click();
+    cy.contains(selectors.shopping.cartLink).click();
     cy.url().should("include", "koszyk");
 
-    cy.get("#coupon_code").type("kwotowy250");
-    cy.get("button[name='apply_coupon']").click();
+    cy.get(selectors.shopping.couponInput).type("kwotowy250");
+    cy.get(selectors.shopping.applyCouponButton).click();
     cy.contains("Kupon został pomyślnie użyty.").should("be.visible");
 
-    cy.contains("Przejdź do płatności").click();
+    cy.contains(selectors.shopping.proceedToPaymentButton).click();
     cy.url().should("include", "zamowienie");
 
-    cy.get("#billing_first_name").type("Michał");
-    cy.get("#billing_last_name").type("Tester");
-    cy.get("#billing_address_1").type("Testowa 12");
-    cy.get("#billing_postcode").type("00-001");
-    cy.get("#billing_city").type("Kraków");
-    cy.get("#billing_phone").type("123456789");
-    cy.get("#billing_email").type(User.email);
+    cy.get(selectors.shopping.firstNameInput).type("Michał");
+    cy.get(selectors.shopping.lastNameInput).type("Tester");
+    cy.get(selectors.shopping.addressInput).type("Testowa 12");
+    cy.get(selectors.shopping.postcodeInput).type("00-001");
+    cy.get(selectors.shopping.cityInput).type("Kraków");
+    cy.get(selectors.shopping.phoneInput).type("123456789");
+    cy.get(selectors.shopping.emailInput).type(user.email);
 
     cy.wait(2500);
-    cy.get("iframe").then(($iframe) => {
+    cy.get(selectors.shopping.iframe).then(($iframe) => {
       const body = $iframe.contents().find("body");
       cy.wrap(body).find('input[name="cardnumber"]').first().type(Card.number);
       cy.wrap(body).find('input[name="exp-date"]').first().type(Card.date);
       cy.wrap(body).find('input[name="cvc"]').first().type(Card.cvc);
     });
 
-    cy.get("#terms").check();
-    cy.get("#place_order").click();
+    cy.get(selectors.shopping.termsCheckbox).check();
+    cy.get(selectors.shopping.placeOrderButton).click();
 
     cy.wait(6000);
 
-    cy.contains("Dziękujemy. Otrzymaliśmy Twoje zamówienie.").should(
-      "be.visible"
-    );
+    cy.contains(selectors.shopping.successMessage).should("be.visible");
   });
 });

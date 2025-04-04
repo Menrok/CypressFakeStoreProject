@@ -37,6 +37,7 @@ export const selectors = {
     proceedToPaymentButton: "Przejdź do płatności",
     firstNameInput: "#billing_first_name",
     lastNameInput: "#billing_last_name",
+    cartButton: '.menu-item-200',
     addressInput: "#billing_address_1",
     postcodeInput: "#billing_postcode",
     cityInput: "#billing_city",
@@ -46,6 +47,12 @@ export const selectors = {
     termsCheckbox: "#terms",
     placeOrderButton: "#place_order",
     successMessage: "Dziękujemy. Otrzymaliśmy Twoje zamówienie.",
+    removeFromCartButton: '.remove[data-product_id="386"]',
+    restoreButton: '.restore-item',
   },
-};
 
+  whitelist: {
+    AddWLButton: '.add_to_wishlist',
+    tableProductWhiteList: 'td.product-name',
+  }
+};

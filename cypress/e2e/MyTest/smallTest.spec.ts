@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 
-import { selectors } from "../../support/selectors";
-
+import { shoppingPageSelectors } from "../../selectors/shoppingPageSelectors";
+import { wishlistPageSelectors } from "../../selectors/wishlistPageSelectors";
 /*
     Test #0001: Dodaje i usuwa produkty z koszyka
     1. Przejdź do strony głównej i wybierz pierwszy produkt z listy.
@@ -28,53 +28,63 @@ import { selectors } from "../../support/selectors";
     5. Powtórz te kroki dla wszystkich urządzeń w tablicy.
 */
 
-describe('', () => {
+describe("Testy koszyka, wyszukiwania i responsywności", () => {
+    let productSearch: { searchTerm: string; wishlistResult: string };
+    let devices: { width: number; height: number }[];
+  
     before(() => {
-        cy.visit("https://fakestore.testelka.pl/");
-        cy.contains("Wybierz podróż dla siebie!").should("be.visible");
+      cy.fixture("productSearch").then((data) => {
+        productSearch = data;
       });
-     
-    it("Dodaje i usuwanie produktów z koszyka", () => {
-        cy.get('.product').first().click();
-        cy.get(selectors.shopping.addToCartButton).first().click();
-        cy.get(selectors.shopping.addToCartButton).eq(2).click();
-        cy.get(selectors.shopping.addToCartButton).eq(3).click();
-
-        cy.wait(1000);
-        
-        cy.get('.menu-item-200').click();
-        cy.get(selectors.shopping.removeFromCartButton).click();
-        cy.get(selectors.shopping.restoreButton).contains('Cofnij?').click();
+  
+      cy.fixture("devices").then((data) => {
+        devices = data;
+      });
+  
+      cy.visit("https://fakestore.testelka.pl/");
+      cy.contains("Wybierz podróż dla siebie!").should("be.visible");
     });
-
+  
+    it("Dodaje i usuwa produkty z koszyka", () => {
+      cy.get(".product").first().click();
+      cy.get(shoppingPageSelectors.addToCartButton).first().click();
+      cy.get(shoppingPageSelectors.addToCartButton).eq(2).click();
+      cy.get(shoppingPageSelectors.addToCartButton).eq(3).click();
+  
+      cy.wait(1000);
+  
+      cy.get(shoppingPageSelectors.cartButton).click();
+      cy.get(shoppingPageSelectors.removeFromCartButton).click();
+      cy.get(shoppingPageSelectors.restoreButton).contains("Cofnij?").click();
+    });
+  
     it("Sprawdza wyszukiwanie produktu i listy życzeń", () => {
-        cy.visit("/");
-
-        cy.get('#woocommerce-product-search-field-0').type('Fuerteventura').type('{enter}');
-        cy.contains("Fuerteventura").should("be.visible");
-        cy.get(selectors.whitelist.AddWLButton).should('be.visible').click();  
-
-        cy.wait(2000);
-
-        cy.visit("https://fakestore.testelka.pl/wishlist/");
-        cy.get(selectors.whitelist.tableProductWhiteList).contains('Fuerteventura - Sotavento').should('be.visible');
+      cy.visit("/");
+  
+      cy.get("#woocommerce-product-search-field-0")
+        .type(productSearch.searchTerm)
+        .type("{enter}");
+  
+      cy.contains(productSearch.searchTerm).should("be.visible");
+      cy.get(wishlistPageSelectors.AddWLButton).should("be.visible").click();
+  
+      cy.wait(2000);
+  
+      cy.visit("https://fakestore.testelka.pl/wishlist/");
+      cy.get(wishlistPageSelectors.tableProductWhiteList)
+        .contains(productSearch.wishlistResult)
+        .should("be.visible");
     });
-
+  
     it("Testuje responsywność strony", () => {
-        const devices = [
-            { width: 375, height: 667 },
-            { width: 768, height: 1024 },
-            { width: 1440, height: 900 },
-        ];
-
-        cy.visit("/");
-
-        devices.forEach((device) => {
-            cy.viewport(device.width, device.height);
-            cy.visit('https://fakestore.testelka.pl/shop/');
-            cy.get('header').should('be.visible');
-            cy.get('.product').should('be.visible');
-            cy.wait(500); 
-        });
+      cy.visit("/");
+  
+      devices.forEach((device) => {
+        cy.viewport(device.width, device.height);
+        cy.visit("https://fakestore.testelka.pl/shop/");
+        cy.get("header").should("be.visible");
+        cy.get(".product").should("be.visible");
+        cy.wait(500);
+      });
     });
-});
+  });

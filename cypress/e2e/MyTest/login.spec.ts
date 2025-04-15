@@ -1,8 +1,8 @@
 /// <reference types="cypress"/>
 
-import { User } from "../../support/interfaces";
-import { selectors } from "../../support/selectors";
-
+import { IUser } from "../../interfaces/user.interface";
+import { registerPageSelectors } from "../../selectors/registerPageSelectors";
+import { accountPageSelectors } from "../../selectors/accountPageSelectors";
 
 /*
     Test #0001: Rejestracja nowego użytkownika
@@ -29,13 +29,18 @@ import { selectors } from "../../support/selectors";
 */
 
 describe("Test rejestracji, logowania i edycji konta", () => {
-  const randomId = Math.floor(100 + Math.random() * 900);
-  const newUser : User = {
-    email: `user_${randomId}@test.com`,
-    password: "TestoweHaslo123",
-  };
+  let newUser: IUser;
 
   before(() => {
+    const randomId = Math.floor(100 + Math.random() * 900);
+
+    cy.fixture("user").then((data) => {
+      newUser = {
+        email: `${data.emailPrefix}_${randomId}@test.com`,
+        password: data.password,
+      };
+    });
+
     cy.visit("https://fakestore.testelka.pl/");
     cy.contains("Wybierz podróż dla siebie!").should("be.visible");
   });
@@ -45,7 +50,7 @@ describe("Test rejestracji, logowania i edycji konta", () => {
 
     cy.url().should("include", "moje-konto");
     cy.contains("Witaj " + newUser.email.split("@")[0]).should("be.visible");
-    cy.contains(selectors.register.logoutButton).should("be.visible");
+    cy.contains(registerPageSelectors.logoutButton).should("be.visible");
   });
 
   it("Logowanie i edycja konta", () => {
@@ -58,28 +63,28 @@ describe("Test rejestracji, logowania i edycji konta", () => {
 
     cy.contains("Edycja konta").click();
 
-    cy.get(selectors.account.firstNameInput).clear().type("Michał");
-    cy.get(selectors.account.lastNameInput).clear().type("Tester");
-    cy.get(selectors.account.displayNameInput).clear().type("TesterM");
+    cy.get(accountPageSelectors.firstNameInput).clear().type("Michał");
+    cy.get(accountPageSelectors.lastNameInput).clear().type("Tester");
+    cy.get(accountPageSelectors.displayNameInput).clear().type("TesterM");
 
-    cy.get(selectors.account.emailInput).scrollIntoView();
-    cy.get(selectors.account.emailInput).should("have.value", newUser.email);
+    cy.get(accountPageSelectors.emailInput).scrollIntoView();
+    cy.get(accountPageSelectors.emailInput).should("have.value", newUser.email);
 
-    cy.get(selectors.account.passwordCurrentInput).clear().type(password);
+    cy.get(accountPageSelectors.passwordCurrentInput).clear().type(password);
     cy.get('[aria-describedby="password_current"]').click();
-    cy.get(selectors.account.passwordCurrentInput)
+    cy.get(accountPageSelectors.passwordCurrentInput)
       .should("have.value", password)
       .and("have.attr", "type", "text");
-    cy.get(selectors.account.passwordCurrentInput).clear().should("have.value", "");
+    cy.get(accountPageSelectors.passwordCurrentInput).clear().should("have.value", "");
 
-    cy.get(selectors.account.passwordNewInput).click();
-    cy.get(selectors.account.passwordConfirmInput).click();
+    cy.get(accountPageSelectors.passwordNewInput).click();
+    cy.get(accountPageSelectors.passwordConfirmInput).click();
 
-    cy.get(selectors.account.saveButton).click();
+    cy.get(accountPageSelectors.saveButton).click();
     cy.contains("Zmieniono szczegóły konta.").should("be.visible");
 
-    cy.get(selectors.account.firstNameInput).should("have.value", "Michał");
-    cy.get(selectors.account.lastNameInput).should("have.value", "Tester");
-    cy.get(selectors.account.displayNameInput).should("have.value", "TesterM");
+    cy.get(accountPageSelectors.firstNameInput).should("have.value", "Michał");
+    cy.get(accountPageSelectors.lastNameInput).should("have.value", "Tester");
+    cy.get(accountPageSelectors.displayNameInput).should("have.value", "TesterM");
   });
 });

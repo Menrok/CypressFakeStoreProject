@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 
-import { Category } from "../../support/interfaces";
+import { ICategory } from "../../interfaces/category.interface";
 
 /*
     Test #0001: Sprawdzanie liczby produktów w kategoriach sklepu
@@ -15,28 +15,30 @@ import { Category } from "../../support/interfaces";
 */
 
 describe('Sprawdzanie ilości produktów w sklepach', () => {
-    before(() => {
-      cy.visit('https://fakestore.testelka.pl/shop/');
+  let categories: ICategory[];
+
+  before(() => {
+    cy.fixture("categories").then((data) => {
+      categories = data;
     });
-  
-    it('Sprawdza ilość produktów w każdej kategorii', () => {
-      const categories: Category[] = [
-        { name: 'Windsurfing', class: 'cat-item-18' },
-        { name: 'Wspinaczka', class: 'cat-item-16' },
-        { name: 'Yoga i pilates', class: 'cat-item-19' },
-        { name: 'Żeglarstwo', class: 'cat-item-17' }
-      ];
-  
-      categories.forEach(category => {
-        cy.get(`.cat-item.${category.class} a`).click();
-  
-        cy.get(`.cat-item.${category.class}`).find('.count').invoke('text').then((countText) => {
+
+    cy.visit('https://fakestore.testelka.pl/shop/');
+  });
+
+  it('Sprawdza ilość produktów w każdej kategorii', () => {
+    categories.forEach(category => {
+      cy.get(`.cat-item.${category.class} a`).click();
+
+      cy.get(`.cat-item.${category.class}`)
+        .find('.count')
+        .invoke('text')
+        .then((countText) => {
           const expectedCount = parseInt(countText.replace(/[^\d]/g, ''), 10);
-          
+
           cy.get('.product').should('have.length', expectedCount);
-          
+
           cy.go('back');
         });
-      });
     });
   });
+});
